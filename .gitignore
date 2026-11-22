@@ -103,6 +103,10 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+!.env.example
+node_modules/
+/server/static/
 .venv
 env/
 venv/

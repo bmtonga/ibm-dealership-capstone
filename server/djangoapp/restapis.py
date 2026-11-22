@@ -1,22 +1,24 @@
-# Uncomment the imports below before you add the function code
-# import requests
 import os
-from dotenv import load_dotenv
+from urllib.parse import quote
+import requests
 
-load_dotenv()
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:3030").rstrip("/")
+SENTIMENT_URL = os.getenv("SENTIMENT_ANALYZER_URL", "http://localhost:5050").rstrip("/")
 
-backend_url = os.getenv(
-    'backend_url', default="http://localhost:3030")
-sentiment_analyzer_url = os.getenv(
-    'sentiment_analyzer_url',
-    default="http://localhost:5050/")
 
-# def get_request(endpoint, **kwargs):
-# Add code for get requests to back end
+def get_request(endpoint, **params):
+    response = requests.get(f"{BACKEND_URL}/{endpoint.lstrip('/')}", params=params, timeout=15)
+    response.raise_for_status()
+    return response.json()
 
-# def analyze_review_sentiments(text):
-# request_url = sentiment_analyzer_url+"analyze/"+text
-# Add code for retrieving sentiments
 
-# def post_review(data_dict):
-# Add code for posting review
+def analyze_review_sentiments(text):
+    response = requests.get(f"{SENTIMENT_URL}/analyze/{quote(text, safe='')}", timeout=15)
+    response.raise_for_status()
+    return response.json().get("sentiment", "neutral")
+
+
+def post_review(data_dict):
+    response = requests.post(f"{BACKEND_URL}/insert_review", json=data_dict, timeout=15)
+    response.raise_for_status()
+    return response.json()

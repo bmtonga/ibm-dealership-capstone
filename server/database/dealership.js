@@ -15,12 +15,13 @@ const dealerships = new Schema({
     type: String,
     required: true
   },
+  st: { type: String },
   address: {
-    type: String,
+    type: Number,
     required: true
   },
   zip: {
-    type: String,
+    type: Number,
     required: true
   },
   lat: {

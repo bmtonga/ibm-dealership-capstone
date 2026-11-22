@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: dealership-web
+    runtime: python
+    plan: free
+    rootDir: server
+    buildCommand: pip install -r requirements.txt && cd frontend && npm ci && DISABLE_ESLINT_PLUGIN=true npm run build && cd .. && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn djangoproj.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /djangoapp/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: SENTIMENT_ANALYZER_URL
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+
+  - type: web
+    name: dealership-api
+    runtime: node
+    plan: free
+    rootDir: server/database
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+
+  - type: web
+    name: dealership-sentiment
+    runtime: python
+    plan: free
+    rootDir: server/djangoapp/microservices
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    healthCheckPath: /health

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import "./Dealers.css";
 import "../assets/style.css";
 import Header from '../Header/Header';
+import { csrfFetch } from '../../api';
 
 
 const PostReview = () => {
@@ -48,7 +49,7 @@ const PostReview = () => {
     });
 
     console.log(jsoninput);
-    const res = await fetch(review_url, {
+    const res = await csrfFetch(review_url, {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
@@ -110,7 +111,7 @@ const PostReview = () => {
       </div >
 
       <div className='input_field'>
-      Car Year <input type="int" onChange={(e) => setYear(e.target.value)} max={2023} min={2015}/>
+      Car Year <input type="number" onChange={(e) => setYear(e.target.value)} max={2035} min={2015}/>
       </div>
 
       <div>

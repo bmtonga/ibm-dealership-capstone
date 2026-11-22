@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import "./Login.css";
 import Header from '../Header/Header';
+import { csrfFetch } from '../../api';
 
 const Login = ({ onClose }) => {
 
@@ -14,7 +15,7 @@ const Login = ({ onClose }) => {
   const login = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(login_url, {
+    const res = await csrfFetch(login_url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -28,6 +29,8 @@ const Login = ({ onClose }) => {
     const json = await res.json();
     if (json.status != null && json.status === "Authenticated") {
         sessionStorage.setItem('username', json.userName);
+        sessionStorage.setItem('firstname', json.firstName || '');
+        sessionStorage.setItem('lastname', json.lastName || '');
         setOpen(false);        
     }
     else {
