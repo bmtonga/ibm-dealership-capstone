@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     rootDir: server
-    buildCommand: pip install -r requirements.txt && cd frontend && npm ci && DISABLE_ESLINT_PLUGIN=true npm run build && cd .. && python manage.py collectstatic --noinput && python manage.py migrate
+    buildCommand: pip install -r requirements.txt && cd frontend && npm ci && CI=false DISABLE_ESLINT_PLUGIN=true npm run build && cd .. && python manage.py collectstatic --noinput && python manage.py migrate
     startCommand: gunicorn djangoproj.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /djangoapp/health
     envVars:
