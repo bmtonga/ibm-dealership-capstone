@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: dealership-web
+    name: bmtonga-dealership-web
     runtime: python
     plan: free
     rootDir: server
@@ -15,18 +15,20 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: bmtonga-dealership-db
+          property: connectionString
       - key: BACKEND_URL
-        sync: false
+        value: https://bmtonga-dealership-api.onrender.com
       - key: SENTIMENT_ANALYZER_URL
-        sync: false
+        value: https://bmtonga-dealership-sentiment.onrender.com
       - key: ALLOWED_HOSTS
-        sync: false
+        value: bmtonga-dealership-web.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        sync: false
+        value: https://bmtonga-dealership-web.onrender.com
 
   - type: web
-    name: dealership-api
+    name: bmtonga-dealership-api
     runtime: node
     plan: free
     rootDir: server/database
@@ -36,14 +38,18 @@ services:
     envVars:
       - key: MONGODB_URI
         sync: false
-      - key: CORS_ORIGIN
-        sync: false
 
   - type: web
-    name: dealership-sentiment
+    name: bmtonga-dealership-sentiment
     runtime: python
     plan: free
     rootDir: server/djangoapp/microservices
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     healthCheckPath: /health
+
+databases:
+  - name: bmtonga-dealership-db
+    plan: free
+    databaseName: dealerships
+    user: dealership_app
