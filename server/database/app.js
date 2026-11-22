@@ -11,7 +11,7 @@ app.use(express.json({ limit: '100kb' }));
 const reviews_data = JSON.parse(fs.readFileSync("reviews.json", 'utf8'));
 const dealerships_data = JSON.parse(fs.readFileSync("dealerships.json", 'utf8'));
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo_db:27017/dealershipsDB");
+const useMongo = Boolean(process.env.MONGODB_URI);
 
 
 const Reviews = require('./review');
@@ -22,7 +22,12 @@ async function seedDatabase() {
   if (await Reviews.countDocuments() === 0) await Reviews.insertMany(reviews_data.reviews);
   if (await Dealerships.countDocuments() === 0) await Dealerships.insertMany(dealerships_data.dealerships);
 }
-mongoose.connection.once('open', () => seedDatabase().catch(console.error));
+const memoryReviews = reviews_data.reviews.map((item) => ({ ...item }));
+const memoryDealers = dealerships_data.dealerships.map((item) => ({ ...item }));
+if (useMongo) {
+  mongoose.connect(process.env.MONGODB_URI);
+  mongoose.connection.once('open', () => seedDatabase().catch(console.error));
+}
 
 
 // Express route to home
@@ -33,7 +38,7 @@ app.get('/', async (req, res) => {
 // Express route to fetch all reviews
 app.get('/fetchReviews', async (req, res) => {
   try {
-    const documents = await Reviews.find();
+    const documents = useMongo ? await Reviews.find() : memoryReviews;
     res.json(documents);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching documents' });
@@ -43,7 +48,8 @@ app.get('/fetchReviews', async (req, res) => {
 // Express route to fetch reviews by a particular dealer
 app.get('/fetchReviews/dealer/:id', async (req, res) => {
   try {
-    const documents = await Reviews.find({dealership: req.params.id});
+    const id = Number.parseInt(req.params.id, 10);
+    const documents = useMongo ? await Reviews.find({dealership: id}) : memoryReviews.filter((review) => review.dealership === id);
     res.json(documents);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching documents' });
@@ -53,7 +59,7 @@ app.get('/fetchReviews/dealer/:id', async (req, res) => {
 // Express route to fetch all dealerships
 app.get('/fetchDealers', async (req, res) => {
   try {
-    res.json(await Dealerships.find().sort({ id: 1 }));
+    res.json(useMongo ? await Dealerships.find().sort({ id: 1 }) : memoryDealers);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching dealerships' });
   }
@@ -64,7 +70,9 @@ app.get('/fetchDealers/:state', async (req, res) => {
   try {
     const state = req.params.state;
     const query = state.toLowerCase() === 'all' ? {} : { state: new RegExp(`^${escapeRegExp(state)}$`, 'i') };
-    res.json(await Dealerships.find(query).sort({ id: 1 }));
+    const documents = useMongo ? await Dealerships.find(query).sort({ id: 1 }) :
+      memoryDealers.filter((dealer) => !Object.keys(query).length || dealer.state.toLowerCase() === state.toLowerCase());
+    res.json(documents);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching dealerships' });
   }
@@ -75,7 +83,7 @@ app.get('/fetchDealer/:id', async (req, res) => {
   try {
     const id = Number.parseInt(req.params.id, 10);
     if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid dealer id' });
-    const dealer = await Dealerships.findOne({ id });
+    const dealer = useMongo ? await Dealerships.findOne({ id }) : memoryDealers.find((item) => item.id === id);
     return dealer ? res.json([dealer]) : res.status(404).json({ error: 'Dealer not found' });
   } catch (error) {
     res.status(500).json({ error: 'Error fetching dealership' });
@@ -89,7 +97,7 @@ app.post('/insert_review', async (req, res) => {
   if (required.some((field) => data[field] === undefined || data[field] === '')) {
     return res.status(400).json({ error: 'Missing required review fields' });
   }
-  const documents = await Reviews.find().sort( { id: -1 } )
+  const documents = useMongo ? await Reviews.find().sort({ id: -1 }) : [...memoryReviews].sort((a, b) => b.id - a.id);
   let new_id = documents.length ? documents[0].id + 1 : 1;
 
   const review = new Reviews({
@@ -105,7 +113,8 @@ app.post('/insert_review', async (req, res) => {
 	});
 
   try {
-    const savedReview = await review.save();
+    const savedReview = useMongo ? await review.save() : { ...review.toObject(), _id: undefined };
+    if (!useMongo) memoryReviews.push(savedReview);
     res.json(savedReview);
   } catch (error) {
 		console.log(error);
@@ -113,7 +122,7 @@ app.post('/insert_review', async (req, res) => {
   }
 });
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', storage: useMongo ? 'mongodb' : 'memory' }));
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -35,9 +35,6 @@ services:
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
-    envVars:
-      - key: MONGODB_URI
-        sync: false
 
   - type: web
     name: bmtonga-dealership-sentiment
