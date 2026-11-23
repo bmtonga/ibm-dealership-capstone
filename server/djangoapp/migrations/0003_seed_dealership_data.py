@@ -8,6 +8,17 @@ from django.db import migrations
 def seed_dealership_data(apps, schema_editor):
     Dealership = apps.get_model("djangoapp", "Dealership")
     Review = apps.get_model("djangoapp", "Review")
+    ContactMessage = apps.get_model("djangoapp", "ContactMessage")
+
+    # The first Render deployment recorded an older 0001 migration which only
+    # contained the vehicle catalog. Create the newer tables when upgrading
+    # that database; fresh installations already have them and skip this step.
+    existing_tables = set(schema_editor.connection.introspection.table_names())
+    for model in (Dealership, Review, ContactMessage):
+        if model._meta.db_table not in existing_tables:
+            schema_editor.create_model(model)
+            existing_tables.add(model._meta.db_table)
+
     data_dir = Path(__file__).resolve().parents[2] / "database" / "data"
 
     dealerships = json.loads(
