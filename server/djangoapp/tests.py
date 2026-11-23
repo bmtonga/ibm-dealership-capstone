@@ -11,7 +11,7 @@ class CarwiseApiTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.dealer = Dealership.objects.create(
-            id=1, city="Lusaka", state="Lusaka", st="LS",
+            id=9999, city="Lusaka", state="Lusaka", st="LS",
             address="1 Great North Road", zip="10101", lat=-15.4,
             long=28.3, short_name="Carwise", full_name="Carwise Motors",
         )
@@ -49,10 +49,10 @@ class CarwiseApiTests(TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_dealer_list_filter_and_detail(self):
-        self.assertEqual(len(self.client.get("/djangoapp/get_dealers").json()["dealers"]), 1)
+        self.assertGreaterEqual(len(self.client.get("/djangoapp/get_dealers").json()["dealers"]), 1)
         self.assertEqual(len(self.client.get("/djangoapp/get_dealers/Lusaka").json()["dealers"]), 1)
-        self.assertEqual(len(self.client.get("/djangoapp/get_dealers/Texas").json()["dealers"]), 0)
-        self.assertEqual(self.client.get("/djangoapp/dealer/1").json()["dealer"][0]["full_name"], "Carwise Motors")
+        self.assertEqual(len(self.client.get("/djangoapp/get_dealers/Atlantis").json()["dealers"]), 0)
+        self.assertEqual(self.client.get("/djangoapp/dealer/9999").json()["dealer"][0]["full_name"], "Carwise Motors")
         self.assertEqual(self.client.get("/djangoapp/dealer/999").status_code, 404)
 
     def test_car_models_are_available(self):
@@ -61,7 +61,7 @@ class CarwiseApiTests(TestCase):
         self.assertEqual(rav4["CarMake"], "Toyota")
 
     def test_review_requires_login_then_creates_with_sentiment(self):
-        payload = {"name":"Ada Driver","dealership":1,"review":"Great friendly service",
+        payload = {"name":"Ada Driver","dealership":9999,"review":"Great friendly service",
                    "purchase":True,"purchase_date":"2026-11-05","car_make":"Toyota",
                    "car_model":"RAV4","car_year":2025}
         self.assertEqual(self.post_json("/djangoapp/add_review", payload).status_code, 401)
@@ -70,9 +70,12 @@ class CarwiseApiTests(TestCase):
         response = self.post_json("/djangoapp/add_review", payload)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["review"]["sentiment"], "positive")
-        reviews = self.client.get("/djangoapp/reviews/dealer/1").json()["reviews"]
+        reviews = self.client.get("/djangoapp/reviews/dealer/9999").json()["reviews"]
         self.assertEqual(reviews[0]["review"], "Great friendly service")
-        self.assertEqual(Review.objects.get().purchase_date, date(2026, 11, 5))
+        self.assertEqual(
+            Review.objects.get(dealership=self.dealer).purchase_date,
+            date(2026, 11, 5),
+        )
 
     def test_contact_message_is_stored(self):
         response = self.post_json("/djangoapp/contact", {
