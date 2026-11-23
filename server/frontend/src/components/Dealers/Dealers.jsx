@@ -1,2 +1,125 @@
-import React,{useState,useEffect} from "react";import Header from "../Header/Header";import "./Dealers.css";
-export default function Dealers(){const [dealers,setDealers]=useState([]),[states,setStates]=useState([]),[loading,setLoading]=useState(true),[query,setQuery]=useState("");const load=async(state="All")=>{setLoading(true);try{const r=await fetch(state==="All"?"/djangoapp/get_dealers":`/djangoapp/get_dealers/${state}`),data=await r.json();if(data.status===200){const list=Array.from(data.dealers);setDealers(list);if(state==="All")setStates([...new Set(list.map(d=>d.state))].sort())}}finally{setLoading(false)}};useEffect(()=>{load()},[]);const shown=dealers.filter(d=>`${d.full_name} ${d.city} ${d.state}`.toLowerCase().includes(query.toLowerCase()));return <><Header/><main className="dealers-page"><section className="listing-hero shell"><span className="eyebrow">Dealer directory</span><h1>Find your best<br/><em>local match.</em></h1><p>Explore verified dealerships and real customer reviews across the country.</p><div className="search-panel"><label><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search dealer, city, or state"/></label><select onChange={e=>load(e.target.value)} defaultValue="All"><option value="All">All states</option>{states.map(s=><option key={s} value={s}>{s}</option>)}</select></div></section><section className="dealer-results shell"><div className="results-head"><div><h2>Explore dealerships</h2><span>{shown.length} locations found</span></div><span className="verified-note">✓ Verified directory</span></div>{loading?<div className="loading-state"><span className="loader"/>Finding dealerships...</div>:<div className="dealer-grid">{shown.map((d,i)=><article className="dealer-card" key={d.id}><div className={`dealer-cover cover-${i%4}`}><span>{d.state}</span><div className="dealer-monogram">{d.full_name?.split(" ").map(x=>x[0]).slice(0,2).join("")}</div></div><div className="dealer-body"><div className="dealer-rating"><span>★ 4.{7+i%3}</span><small>Verified reviews</small></div><h3>{d.full_name}</h3><p>⌖ {d.address}, {d.city}, {d.state} {d.zip}</p><div className="dealer-card-actions"><a href={`/dealer/${d.id}`}>View profile <span>→</span></a>{sessionStorage.getItem("username")&&<a className="review-link" href={`/postreview/${d.id}`}>Write review</a>}</div></div></article>)}</div>}</section></main></>}
+import React, { useState, useEffect } from "react";
+import Header from "../Header/Header";
+import "./Dealers.css";
+export default function Dealers() {
+  const [dealers, setDealers] = useState([]),
+    [states, setStates] = useState([]),
+    [loading, setLoading] = useState(true),
+    [query, setQuery] = useState("");
+  const load = async (state = "All") => {
+    setLoading(true);
+    try {
+      const r = await fetch(
+          state === "All"
+            ? "/djangoapp/get_dealers"
+            : `/djangoapp/get_dealers/${state}`,
+        ),
+        data = await r.json();
+      if (data.status === 200) {
+        const list = Array.from(data.dealers);
+        setDealers(list);
+        if (state === "All")
+          setStates([...new Set(list.map((d) => d.state))].sort());
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+  const shown = dealers.filter((d) =>
+    `${d.full_name} ${d.city} ${d.state}`
+      .toLowerCase()
+      .includes(query.toLowerCase()),
+  );
+  return (
+    <>
+      <Header />
+      <main className="dealers-page">
+        <section className="listing-hero shell">
+          <span className="eyebrow">Dealer directory</span>
+          <h1>
+            Find your best
+            <br />
+            <em>local match.</em>
+          </h1>
+          <p>
+            Explore verified dealerships and real customer reviews across the
+            country.
+          </p>
+          <div className="search-panel">
+            <label>
+              <span>⌕</span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search dealer, city, or state"
+              />
+            </label>
+            <select onChange={(e) => load(e.target.value)} defaultValue="All">
+              <option value="All">All states</option>
+              {states.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+        <section className="dealer-results shell">
+          <div className="results-head">
+            <div>
+              <h2>Explore dealerships</h2>
+              <span>{shown.length} locations found</span>
+            </div>
+            <span className="verified-note">✓ Verified directory</span>
+          </div>
+          {loading ? (
+            <div className="loading-state">
+              <span className="loader" />
+              Finding dealerships...
+            </div>
+          ) : (
+            <div className="dealer-grid">
+              {shown.map((d, i) => (
+                <article className="dealer-card" key={d.id}>
+                  <div className={`dealer-cover cover-${i % 4}`}>
+                    <span>{d.state}</span>
+                    <div className="dealer-monogram">
+                      {d.full_name
+                        ?.split(" ")
+                        .map((x) => x[0])
+                        .slice(0, 2)
+                        .join("")}
+                    </div>
+                  </div>
+                  <div className="dealer-body">
+                    <div className="dealer-rating">
+                      <span>★ 4.{7 + (i % 3)}</span>
+                      <small>Verified reviews</small>
+                    </div>
+                    <h3>{d.full_name}</h3>
+                    <p>
+                      ⌖ {d.address}, {d.city}, {d.state} {d.zip}
+                    </p>
+                    <div className="dealer-card-actions">
+                      <a href={`/dealer/${d.id}`}>
+                    View profile
+                      </a>
+                      {sessionStorage.getItem("username") && (
+                        <a className="review-link" href={`/postreview/${d.id}`}>
+                          Write review
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+    </>
+  );
+}

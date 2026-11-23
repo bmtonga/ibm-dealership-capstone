@@ -1,2 +1,126 @@
-import React,{useState,useEffect} from "react";import {useParams} from "react-router-dom";import Header from "../Header/Header";import "./Dealers.css";
-export default function PostReview(){const {id}=useParams(),[dealer,setDealer]=useState({}),[review,setReview]=useState(""),[model,setModel]=useState(""),[year,setYear]=useState(""),[date,setDate]=useState(""),[cars,setCars]=useState([]),[busy,setBusy]=useState(false);useEffect(()=>{fetch(`/djangoapp/dealer/${id}`).then(r=>r.json()).then(d=>d.status===200&&setDealer(Array.from(d.dealer)[0]||{}));fetch("/djangoapp/get_cars").then(r=>r.json()).then(d=>setCars(Array.from(d.CarModels||[])))},[id]);const submit=async e=>{e.preventDefault();if(!model)return;setBusy(true);const [car_make,...rest]=model.split(" ");const body={name:`${sessionStorage.getItem("firstname")||""} ${sessionStorage.getItem("lastname")||""}`.trim()||sessionStorage.getItem("username"),dealership:id,review,purchase:true,purchase_date:date,car_make,car_model:rest.join(" "),car_year:year};try{const r=await fetch("/djangoapp/add_review",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),data=await r.json();if(data.status===200)window.location.href=`/dealer/${id}`}finally{setBusy(false)}};return <><Header/><main className="dealers-page"><section className="review-form-wrap"><a className="detail-back" href={`/dealer/${id}`}>← Back to dealership</a><span className="eyebrow" style={{display:"flex",marginTop:35}}>Share your experience</span><h1>Review {dealer.full_name||"this dealership"}</h1><p style={{color:"var(--muted)"}}>Your honest feedback helps the next driver make a confident decision.</p><form className="review-form" onSubmit={submit}><label>Your review<textarea rows="6" required placeholder="What stood out about your dealership experience?" value={review} onChange={e=>setReview(e.target.value)}/></label><div className="field-row"><label>Purchase date<input type="date" required value={date} onChange={e=>setDate(e.target.value)}/></label><label>Vehicle<select required value={model} onChange={e=>setModel(e.target.value)}><option value="">Choose make and model</option>{cars.map((c,i)=><option key={i} value={`${c.CarMake} ${c.CarModel}`}>{c.CarMake} {c.CarModel}</option>)}</select></label></div><label>Vehicle year<input type="number" required min="1990" max={new Date().getFullYear()+1} placeholder="e.g. 2024" value={year} onChange={e=>setYear(e.target.value)}/></label><button className="button button-primary" disabled={busy}>{busy?"Publishing...":"Publish review →"}</button></form></section></main></>}
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import Header from "../Header/Header";
+import "./Dealers.css";
+export default function PostReview() {
+  const { id } = useParams(),
+    [dealer, setDealer] = useState({}),
+    [review, setReview] = useState(""),
+    [model, setModel] = useState(""),
+    [year, setYear] = useState(""),
+    [date, setDate] = useState(""),
+    [cars, setCars] = useState([]),
+    [busy, setBusy] = useState(false);
+  useEffect(() => {
+    fetch(`/djangoapp/dealer/${id}`)
+      .then((r) => r.json())
+      .then(
+        (d) => d.status === 200 && setDealer(Array.from(d.dealer)[0] || {}),
+      );
+    fetch("/djangoapp/get_cars")
+      .then((r) => r.json())
+      .then((d) => setCars(Array.from(d.CarModels || [])));
+  }, [id]);
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!model) return;
+    setBusy(true);
+    const [car_make, ...rest] = model.split(" ");
+    const body = {
+      name:
+        `${sessionStorage.getItem("firstname") || ""} ${sessionStorage.getItem("lastname") || ""}`.trim() ||
+        sessionStorage.getItem("username"),
+      dealership: id,
+      review,
+      purchase: true,
+      purchase_date: date,
+      car_make,
+      car_model: rest.join(" "),
+      car_year: year,
+    };
+    try {
+      const r = await fetch("/djangoapp/add_review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }),
+        data = await r.json();
+      if (data.status === 200) window.location.href = `/dealer/${id}`;
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <Header />
+      <main className="dealers-page">
+        <section className="review-form-wrap">
+          <a className="detail-back" href={`/dealer/${id}`}>
+          Back to dealership
+          </a>
+          <span className="eyebrow" style={{ display: "flex", marginTop: 35 }}>
+            Share your experience
+          </span>
+          <h1>Review {dealer.full_name || "this dealership"}</h1>
+          <p style={{ color: "var(--muted)" }}>
+            Your honest feedback helps the next driver make a confident
+            decision.
+          </p>
+          <form className="review-form" onSubmit={submit}>
+            <label>
+              Your review
+              <textarea
+                rows="6"
+                required
+                placeholder="What stood out about your dealership experience?"
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+              />
+            </label>
+            <div className="field-row">
+              <label>
+                Purchase date
+                <input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </label>
+              <label>
+                Vehicle
+                <select
+                  required
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                >
+                  <option value="">Choose make and model</option>
+                  {cars.map((c, i) => (
+                    <option key={i} value={`${c.CarMake} ${c.CarModel}`}>
+                      {c.CarMake} {c.CarModel}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <label>
+              Vehicle year
+              <input
+                type="number"
+                required
+                min="1990"
+                max={new Date().getFullYear() + 1}
+                placeholder="e.g. 2024"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              />
+            </label>
+            <button className="button button-primary" disabled={busy}>
+            {busy ? "Publishing..." : "Publish review"}
+            </button>
+          </form>
+        </section>
+      </main>
+    </>
+  );
+}
