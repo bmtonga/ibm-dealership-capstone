@@ -48,9 +48,34 @@ export default function Contact() {
         <section className="contact-grid shell">
           <div className="contact-aside">
             <h3>Talk to our team</h3>
-            <p>We usually respond within one business day.</p>
-            <a href="mailto:hello@carwise.com">hello@carwise.com</a>
-            <span>Mon–Fri · 8:00–17:00</span>
+            <p>
+              Have questions or want to schedule a test drive? Call, email, or
+              visit us. We usually respond within one business day.
+            </p>
+            <div className="contact-details-list">
+              <div>
+                <small>Email address</small>
+                <a href="mailto:support@bestcars.com">
+                  support@bestcars.com
+                </a>
+              </div>
+              <div>
+                <small>Phone number</small>
+                <a href="tel:+11234567890">+1 (123) 456-7890</a>
+                <span>Call to schedule a test drive</span>
+              </div>
+              <div>
+                <small>Our dealership</small>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=123+Main+Street%2C+City%2C+Country"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  123 Main Street, City, Country
+                </a>
+              </div>
+            </div>
+            <span className="contact-hours">Mon–Fri · 8:00–17:00</span>
           </div>
           <form className="form-card" onSubmit={submit}>
             <div className="field-row">
