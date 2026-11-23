@@ -1,12 +1,20 @@
 from django.urls import path
+
 from . import views
 
 app_name = "djangoapp"
+
 urlpatterns = [
-    path("csrf", views.csrf_token),
-    path("login", views.login_user), path("logout", views.logout_request), path("register", views.registration),
-    path("get_dealers", views.get_dealerships), path("get_dealers/<str:state>", views.get_dealerships),
-    path("reviews/dealer/<int:dealer_id>", views.get_dealer_reviews),
-    path("dealer/<int:dealer_id>", views.get_dealer_details),
-    path("get_cars", views.get_cars), path("add_review", views.add_review), path("health", views.health),
+    path("health", views.health, name="health"),
+    path("register", views.registration, name="register"),
+    path("login", views.login_user, name="login"),
+    path("logout", views.logout_user, name="logout"),
+    path("session", views.session_status, name="session"),
+    path("get_dealers", views.get_dealerships, name="dealers"),
+    path("get_dealers/<str:state>", views.get_dealerships, name="dealers-state"),
+    path("dealer/<int:dealer_id>", views.get_dealer_details, name="dealer"),
+    path("reviews/dealer/<int:dealer_id>", views.get_dealer_reviews, name="reviews"),
+    path("get_cars", views.get_cars, name="cars"),
+    path("add_review", views.add_review, name="add-review"),
+    path("contact", views.contact, name="contact"),
 ]

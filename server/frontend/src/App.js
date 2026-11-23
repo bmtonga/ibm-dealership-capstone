@@ -1,28 +1,26 @@
-import LoginPanel from "./components/Login/Login"
-import { Routes, Route } from "react-router-dom";
-import Register from "./components/Register/Register";
+import { Navigate, Routes, Route } from "react-router-dom";
+import Header from "./components/Header/Header";
 import Dealers from "./components/Dealers/Dealers";
 import Dealer from "./components/Dealers/Dealer";
 import PostReview from "./components/Dealers/PostReview";
-import Header from "./components/Header/Header";
+import Login from "./components/Login/Login";
+import Register from "./components/Register/Register";
+import ContactPage from "./components/Contact/Contact";
+import "./App.css";
 
-const Home = () => <><Header/><main style={{maxWidth:900,margin:'40px auto',textAlign:'center'}}><h1>Welcome to Dealerships</h1><img src="/static/car_dealership.jpg" alt="Car dealership" style={{maxWidth:'100%',borderRadius:12}}/><p><a className="btn btn-info m-3" href="/dealers">View Dealerships</a></p></main></>;
-const About = () => <><Header/><main className="container py-5"><h1>About Us</h1><p>We connect drivers with trusted dealerships and transparent customer reviews across the United States.</p></main></>;
-const Contact = () => <><Header/><main className="container py-5"><h1>Contact Us</h1><p>Email: support@dealerships.example</p></main></>;
+const Arrow = () => <span aria-hidden="true">&#8594;</span>;
 
-function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginPanel />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/dealers" element={<Dealers />} />
-      <Route path="/dealer/:id" element={<Dealer />} />
-      <Route path="/postreview/:id" element={<PostReview />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="*" element={<Home />} />
-    </Routes>
-  );
+function Home() {
+  return <><Header/><main>
+    <section className="hero shell"><div className="hero-copy"><span className="eyebrow"><span className="status-dot"/> Trusted by drivers nationwide</span><h1>Find a dealership<br/><em>worth the drive.</em></h1><p>Browse verified dealerships, compare real customer experiences, and choose your next car with confidence.</p><div className="hero-actions"><a className="button button-primary" href="/dealers">Explore dealerships <Arrow/></a><a className="button button-ghost" href="/about">How it works</a></div><div className="trust-row"><div><strong>4.9</strong><span>Average rating</span></div><div><strong>500+</strong><span>Dealer profiles</span></div><div><strong>10k+</strong><span>Driver reviews</span></div></div></div>
+    <div className="hero-visual"><div className="orb orb-one"/><div className="orb orb-two"/><div className="dashboard-card"><div className="dashboard-top"><span>Top dealers near you</span><span className="badge">Live</span></div><div className="car-stage"><div className="car-silhouette">CAR</div><span className="rating-pill">★ 4.9</span></div><div className="dealer-preview"><div className="avatar">BC</div><div><strong>Best Cars Auto</strong><span>Columbus, Ohio</span></div><a href="/dealers">View <Arrow/></a></div></div><div className="floating-card"><span className="check">✓</span><div><strong>Verified reviews</strong><small>From real customers</small></div></div></div></section>
+    <section className="proof-strip"><div className="shell"><span>Everything you need to choose confidently</span><b>Verified dealers</b><b>Real reviews</b><b>Smart filters</b><b>Fast decisions</b></div></section>
+    <section className="section shell"><div className="section-heading"><span className="eyebrow">A simpler way to shop</span><h2>Your next dealership,<br/>without the guesswork.</h2><p>Purpose-built tools make it easy to discover, compare, and review dealerships.</p></div><div className="feature-grid"><article className="feature-card mint"><span className="feature-icon">⌖</span><h3>Search locally</h3><p>Filter dealerships by state and quickly find trusted options in your area.</p><a href="/dealers">Browse nearby <Arrow/></a></article><article className="feature-card violet"><span className="feature-icon">★</span><h3>Read real stories</h3><p>See detailed purchase experiences and sentiment at a glance.</p><a href="/dealers">Read reviews <Arrow/></a></article><article className="feature-card amber"><span className="feature-icon">✓</span><h3>Share your experience</h3><p>Help the next driver by leaving a clear, useful dealership review.</p><a href="/register">Join the community <Arrow/></a></article></div></section>
+    <section className="cta shell"><div><span className="eyebrow light">Ready when you are</span><h2>Drive your decision<br/>with confidence.</h2></div><div><p>Join thousands of drivers making smarter dealership choices.</p><a className="button button-light" href="/dealers">Find your dealer <Arrow/></a></div></section>
+  </main><Footer/></>;
 }
-export default App;
+
+function About(){return <><Header/><main><section className="page-hero shell"><span className="eyebrow">About Carwise</span><h1>Better information.<br/><em>Better journeys.</em></h1><p>We believe choosing a dealership should feel as exciting as choosing the car itself.</p></section><section className="story shell"><div className="story-card"><span>Our mission</span><h2>Put drivers in the driver's seat.</h2></div><div className="story-copy"><p>Carwise brings dealership information and genuine customer reviews into one simple, transparent experience.</p><p>We help drivers compare local options while giving customers a place to share the details that matter.</p><div className="value-list"><div><b>01</b><span><strong>Clarity first</strong>Useful information, presented simply.</span></div><div><b>02</b><span><strong>Community powered</strong>Real experiences guide better choices.</span></div><div><b>03</b><span><strong>Built on trust</strong>Transparency in every interaction.</span></div></div></div></section></main><Footer/></>}
+function Footer(){return <footer><div className="shell footer-inner"><a className="brand footer-brand" href="/"><span className="brand-mark">C</span><span>carwise</span></a><p>Better dealership decisions, powered by real drivers.</p><div className="footer-links"><a href="/dealers">Dealers</a><a href="/about">About</a><a href="/contact">Contact</a></div><span className="copyright">© 2026 Carwise</span></div></footer>}
+
+export default function App(){return <Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/contact" element={<ContactPage/>}/><Route path="/dealers" element={<Dealers/>}/><Route path="/dealer/:id" element={<Dealer/>}/><Route path="/postreview/:id" element={sessionStorage.getItem("username")?<PostReview/>:<Navigate to="/login" replace/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Register/>}/><Route path="*" element={<Home/>}/></Routes>}

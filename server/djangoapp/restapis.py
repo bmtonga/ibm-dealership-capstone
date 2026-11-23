@@ -1,24 +1,27 @@
 import os
 from urllib.parse import quote
+
 import requests
+from dotenv import load_dotenv
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:3030").rstrip("/")
-SENTIMENT_URL = os.getenv("SENTIMENT_ANALYZER_URL", "http://localhost:5050").rstrip("/")
+load_dotenv()
+backend_url = os.getenv("backend_url", "http://localhost:3030").rstrip("/")
+sentiment_analyzer_url = os.getenv("sentiment_analyzer_url", "http://localhost:5050").rstrip("/")
 
 
-def get_request(endpoint, **params):
-    response = requests.get(f"{BACKEND_URL}/{endpoint.lstrip('/')}", params=params, timeout=15)
+def get_request(endpoint, **kwargs):
+    response = requests.get(f"{backend_url}/{endpoint.lstrip('/')}", params=kwargs or None, timeout=10)
     response.raise_for_status()
     return response.json()
 
 
 def analyze_review_sentiments(text):
-    response = requests.get(f"{SENTIMENT_URL}/analyze/{quote(text, safe='')}", timeout=15)
+    response = requests.get(f"{sentiment_analyzer_url}/analyze/{quote(text, safe='')}", timeout=10)
     response.raise_for_status()
-    return response.json().get("sentiment", "neutral")
+    return response.json()
 
 
 def post_review(data_dict):
-    response = requests.post(f"{BACKEND_URL}/insert_review", json=data_dict, timeout=15)
+    response = requests.post(f"{backend_url}/insert_review", json=data_dict, timeout=10)
     response.raise_for_status()
     return response.json()
